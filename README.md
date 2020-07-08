@@ -6,7 +6,7 @@ This .NET Core Console app will allow you to change and interact with files in t
 - Download Files from OneDrive
 - View Files in OneDrive, including
   - All files relevant to (trending around) the signed in User
-  -
+  - All files edited, created and updated by the signed in User
 
 ## Prerequisites
 
