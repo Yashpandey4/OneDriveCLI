@@ -1,0 +1,85 @@
+// Uploading new small files up to 4 MB
+HTTP PUT https://graph.microsoft.com/v1.0/me/drive/root:/myNewSmallFile.txt:/content
+Content-Type: text/plain
+
+This is a new small file
+
+// To update or replace an existing file up to 4 MB
+HTTP PUT https://graph.microsoft.com/v1.0/me/drive/items/{item-id}/content
+Content-Type: text/plain
+
+A new small file
+
+/** Uploading large files greater than 4 MB */
+
+// 1. start by creating a new upload session:
+HTTP POST https://graph.microsoft.com/v1.0/me/drive/root/createUploadSession
+Content-Type: application/json
+
+{
+  "item": { "name": "largefile.zip"}
+}
+
+// 2. This will return the upload session that contains the URL to upload the file and when the temporary upload location will expire:
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "uploadUrl": "https://sn3302.up.1drv.com/up/example-hash",
+  "expirationDateTime": "Example-date-timestamp"
+}
+
+// 3. Once you've created the upload session, you can then upload bytes to the temporary file in OneDrive. 
+// In this example, you're uploading the first 25 bytes for a 128-byte file
+HTTP PUT https://sn3302.up.1drv.com/up/example-hash
+Content-Length: 26
+Content-Range: bytes 0-25/128
+
+//b<bytes 0-25 of the file>
+
+// Response: 
+HTTP/1.1 202 Accepted
+Content-Type: application/json
+{ "expirationDateTime": "2019-12-29T09:21:55.523Z", "nextExpectedRanges": ["26-"] }
+
+// Cancelling an upload session
+HTTP DELETE https://sn3302.up.1drv.com/up/example-hash
+
+// Resuming an upload session
+HTTP GET https://sn3302.up.1drv.com/up/example-hash
+
+// Files trending around a user
+HTTP GET https://graph.microsoft.com/v1.0/me/insights/trending
+
+// This request will return a collection of documents, each with an assigned weight that can be used to rank relevance:
+{
+    "value": [
+      {
+        "id": "id-value",
+        "weight": "weight-value",
+        "resourceVisualization": {
+          "title": "title-value",
+          "type": "type-value",
+          "mediaType": "mediaType-value",
+          "previewImageUrl": "previewImageUrl-value",
+          "previewText": "previewText-value",
+          "containerWebUrl": "containerWebUrl-value",
+          "containerDisplayName": "containerDisplayName-value",
+          "containerType": "containerType-value"
+        },
+        "resourceReference": {
+          "webUrl": "webUrl-value",
+          "id": "id-value",
+          "type": "type-value"
+        }
+      }
+    ]
+  }
+
+// Listing files the user has accessed or modified
+HTTP GET https://graph.microsoft/com/v1.0/me/insights/used
+
+// This request will return a similar response to the trending endpoint except each item returned doesn't include a weight and in the collection will include a lastused object with two properties:
+
+// lastAccessedDateTime: The timestamp when the file was last accessed by the user.
+// lastModifiedDateTime: The timestamp when the file was last modified by the user.
