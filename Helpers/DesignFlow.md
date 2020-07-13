@@ -2,32 +2,30 @@
 
 1. [High level stepwise overview](#overview)
 2. [Tackling Individual Tasks](#tasks)
-
-- [Uploading files to OneDrive](#upload)
-  - [Uploading new small files up to 4 MB](#less4)
-  - [To update or replace an existing file up to 4 MB](#lesser4)
-  - [Uploading large files greater than 4 MB](#more4)
-  - [Cancelling an upload session](#cancel)
-  - [Resuming an upload session](#resume)
-  - [Files trending around a user](#trend)
-  - [Listing files the user has accessed or modified](#access)
-- [Create a sharing link for a DriveItem](#share)
-  - [Creating Global Share Links](#global)
-  - [Creating company sharable links](#internal)
-  - [Creating embedded links](#embed)
-- [Creating expirable links for Document Sharing](#expire)
-- [User Authentication](#auth)
-  - [code flow](#code_flow)
-  - [token flow](#token_flow)
-  - [Sign the user out](#sign_out)
-- [Deleting a file](#delete)
-
+  - [Uploading files to OneDrive](#upload)
+    - [Uploading new small files up to 4 MB](#less4)
+    - [To update or replace an existing file up to 4 MB](#lesser4)
+    - [Uploading large files greater than 4 MB](#more4)
+    - [Cancelling an upload session](#cancel)
+    - [Resuming an upload session](#resume)
+    - [Files trending around a user](#trend)
+    - [Listing files the user has accessed or modified](#access)
+  - [Create a sharing link for a DriveItem](#share)
+    - [Creating Global Share Links](#global)
+    - [Creating company sharable links](#internal)
+    - [Creating embedded links](#embed)
+  - [Creating expirable links for Document Sharing](#expire)
+  - [User Authentication](#auth)
+    - [code flow](#code_flow)
+    - [token flow](#token_flow)
+    - [Sign the user out](#sign_out)
+  - [Deleting a file](#delete)
 3. [salesforce integration](#salesforce_integration)
 4. [Remarks](#remarks)
 5. [Tools and Useful Links](#tools)
 
 # High level stepwise overview <a name="overview"></a>
-
+(Note: SalesForce Support is yet to be added)
 1. The User logs in the Graph Node Endpoint with the account in which the file he wants to share is located via browser
 2. Alternatively, a codeflow or tokenflow based approach automates the authentication process
 3. The File to be shared is created/fetched and transferred to a folder 'SalesForce' in the users OneDrive
