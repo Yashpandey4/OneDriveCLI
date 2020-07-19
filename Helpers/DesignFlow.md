@@ -278,7 +278,24 @@ We can configure this option in Office 365 admin center like below: (No 'obvious
 
 Note: this only applies to external (anonymous) links. Internal (organisational) links dont expire.
 
-Extra: Manual ways to expire a link - Please see [this](https://support.microsoft.com/en-us/office/stop-sharing-onedrive-or-sharepoint-files-or-folders-or-change-permissions-0a36470f-d7fe-40a0-bd74-0ac6c1e13323) link.
+##### Deleting permissions using REST API calls
+**Request**
+```
+DELETE /drives/{drive-id}/items/{item-id}/permissions/{perm-id}
+DELETE /groups/{group-id}/drive/items/{item-id}/permissions/{perm-id}
+DELETE /me/drive/items/{item-id}/permissions/{perm-id}
+DELETE /sites/{site-id}/drive/items/{item-id}/permissions/{perm-id}
+DELETE /users/{user-id}/drive/items/{item-id}/permissions/{perm-id}
+```
+
+**Response**
+`HTTP/1.1 204 No Content`
+
+**Optional Headers**
+- if-match: string - If this request header is included and the eTag (or cTag) provided does not match the current tag on the item, a 412 Precondition Failed response is returned and the item will not be deleted.
+
+**Extra: Manual ways to expire a link** 
+- Please see [this](https://support.microsoft.com/en-us/office/stop-sharing-onedrive-or-sharepoint-files-or-folders-or-change-permissions-0a36470f-d7fe-40a0-bd74-0ac6c1e13323) link.
 
 ## Authentication <a name="auth"></a>
 
