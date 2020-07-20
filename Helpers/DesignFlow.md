@@ -14,6 +14,11 @@
     - [Creating Global Share Links](#global)
     - [Creating company sharable links](#internal)
     - [Creating embedded links](#embed)
+    - [Send a sharing invitation](#invite)
+    - [List people with permissions](#shareList)
+    - [Update sharing permission](#updateShare)
+    - [Accessing shared DriveItems](#access)
+    - [Get sharing permission for a file or folder](#fileShare)
   - [Creating expirable links for Document Sharing](#expire)
   - [User Authentication](#auth)
     - [code flow](#code_flow)
@@ -27,7 +32,7 @@
 # High level stepwise overview <a name="overview"></a>
 (Note: SalesForce Support is yet to be added)
 1. The User logs in the Graph Node Endpoint with the account in which the file he wants to share is located via browser
-2. Alternatively, a codeflow or tokenflow based approach automates the authentication process
+2. Alternatively, a codeflow or tokenflow based approach automates the authenticatGet sharing permission for a file or folderion process
 3. The File to be shared is created/fetched and transferred to a folder 'SalesForce' in the users OneDrive
 4. Based on the size (4 MB) the file is uploaded to user's OneDrive.
 5. Share Links for the file is programmatically generated using a user defined access level (user can be asked if he would like to share the file globally or within the org, and for which access level: View/Comment/Edit)
@@ -270,6 +275,316 @@ Content-Type: application/json
   }
 }
 ```
+
+#### Send a sharing invitation: <a name="share"></a>
+
+Sends a sharing invitation for a DriveItem. A sharing invitation provides permissions to the recipients and optionally sends them an email with a sharing link.
+
+##### Request
+```
+POST /drives/{drive-id}/items/{item-id}/invite
+POST /groups/{group-id}/drive/items/{item-id}/invite
+POST /me/drive/items/{item-id}/invite
+POST /sites/{siteId}/drive/items/{itemId}/invite
+POST /users/{userId}/drive/items/{itemId}/invite
+```
+
+##### Request Body
+```
+{
+  "requireSignIn": false,
+  "sendInvitation": false,
+  "roles": [ "read | write"],
+  "recipients": [
+    { "@odata.type": "microsoft.graph.driveRecipient" },
+    { "@odata.type": "microsoft.graph.driveRecipient" }
+  ],
+  "message": "string"
+}
+```
+
+- recipients:	Collection(DriveRecipient) -	A collection of recipients who will receive access and the sharing invitation.
+- message:	String -	A plain text formatted message that is included in the sharing invitation. Maximum length 2000 characters.
+- requireSignIn:	Boolean -	Specifies whether the recipient of the invitation is required to sign-in to view the shared item.
+- sendInvitation:	Boolean	- If true, a sharing link is sent to the recipient. Otherwise, a permission is granted directly without sending a notification.
+- roles:	Collection(String) -	Specify the roles that are to be granted to the recipients of the sharing invitation.
+
+**Example**
+```
+POST /me/drive/items/{item-id}/invite
+Content-type: application/json
+
+{
+  "recipients": [
+    {
+      "email": "pratyushpandey4@geminid.com"
+    }
+  ],
+  "message": "Here's the file that we're collaborating on.",
+  "requireSignIn": true,
+  "sendInvitation": true,
+  "roles": [ "write" ]
+}
+```
+
+**Response**
+```
+HTTP/1.1 200 OK
+Content-type: application/json
+
+{
+  "value": [
+    {
+      "grantedTo": {
+        "user": {
+          "displayName": "Ryan Gregg",
+          "id": "42F177F1-22C0-4BE3-900D-4507125C5C20"
+        }
+      },
+      "id": "CCFC7CA3-7A19-4D57-8CEF-149DB9DDFA62",
+      "invitation": {
+        "email": "ryan@contoso.com",
+        "signInRequired": true
+      },
+      "roles": [ "write" ]
+    }
+  ]
+}
+```
+
+#### List sharing permissions on a DriveItem <a name="shareList"></a>
+The permissions collection includes potentially sensitive information and may not be available for every caller.
+- For the owner of the item, all sharing permissions will be returned. This includes co-owners.
+- For a non-owner caller, only the sharing permissions that apply to the caller are returned.
+- Sharing permission properties that contain secrets (e.g. shareId and webUrl) are only returned for callers that are able to create the sharing permission.
+
+##### Request
+```
+GET /drives/{drive-id}/items/{item-id}/permissions
+GET /groups/{group-id}/drive/items/{item-id}/permissions
+GET /me/drive/items/{item-id}/permissions
+GET /me/drive/root:/{path}:/permissions
+GET /sites/{siteId}/drive/items/{itemId}/permissions
+GET /users/{userId}/drive/items/{itemId}/permissions
+```
+
+Effective sharing permissions of a DriveItem can come from two sources:
+
+- Sharing permissions applied directly on the DriveItem itself
+- Sharing permissions inherited from the DriveItem's ancestors
+- Callers can differentiate if the permission is inherited or not by checking the inheritedFrom property. This property is an itemReference resource referencing the ancestor that the permission is inherited from.
+
+##### Example
+`GET /me/drive/items/{item-id}/permissions`
+
+**Response**
+```
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "value": [
+    {
+      "id": "1",
+      "roles": ["write"],
+      "link": {
+        "webUrl": "https://onedrive.live.com/redir?resid=5D33DD65C6932946!70859&authkey=!AL7N1QAfSWcjNU8&ithint=folder%2cgif",
+        "type": "edit"
+      }
+    },
+    {
+      "id": "2",
+      "roles": ["write"],
+      "grantedTo": {
+        "user": {
+          "id": "5D33DD65C6932946",
+          "displayName": "John Doe"
+        }
+      },
+      "inheritedFrom": {
+        "driveId": "1234567890ABD",
+        "id": "1234567890ABC!123",
+        "path": "/drive/root:/Documents" }
+    },
+    {
+      "id": "3",
+      "roles": ["write"],
+      "link": {
+        "webUrl": "https://onedrive.live.com/redir?resid=5D33DD65C6932946!70859&authkey=!AL7N1QAfSWcjNU8&ithint=folder%2cgif",
+        "type": "edit",
+        "application": {
+          "id": "12345",
+          "displayName": "Contoso Time Manager"
+        }
+      }
+    }
+  ]
+}
+```
+
+#### Update sharing permission <a name="updateShare">
+
+##### Request
+
+```
+PATCH /drives/{drive-id}/items/{item-id}/permissions/{perm-id}
+PATCH /groups/{group-id}/drive/items/{item-id}/permissions/{perm-id}
+PATCH /me/drive/items/{item-id}/permissions/{perm-id}
+PATCH /sites/{site-id}/drive/items/{item-id}/permissions/{perm-id}
+PATCH /users/{user-id}/drive/items/{item-id}/permissions/{perm-id}
+```
+
+**Example**
+```
+PATCH /me/drive/items/{item-id}/permissions/{perm-id}
+Content-type: application/json
+
+{
+  "roles": [ "read" ]
+}
+```
+
+**Response**
+```
+HTTP/1.1 200 OK
+Content-type: application/json
+
+{
+  "grantedTo": {
+    "user": {
+      "displayName": "Ryan Gregg",
+      "id": "efee1b77-fb3b-4f65-99d6-274c11914d12"
+    }
+  },
+  "id": "1",
+  "roles": [ "read" ]
+}
+```
+
+#### Accessing shared DriveItems  <a name="access"></a>
+
+- Access a shared DriveItem or a collection of shared items by using a shareId or sharing URL.
+- To use a sharing URL with this API, your app needs to transform the URL into a sharing token.
+
+Request: `GET /shares/{shareIdOrEncodedSharingUrl}`
+
+**Encoding sharing URLs**
+To encode a sharing URL, use the following logic:
+- First, use base64 encode the URL.
+- Convert the base64 encoded result to unpadded base64url format by removing = characters from the end of the value, replacing / with _ and + with -.)
+- Append u! to be beginning of the string.
+
+Here is encoding logic in C#
+```
+string sharingUrl = "https://onedrive.live.com/redir?resid=1231244193912!12&authKey=1201919!12921!1";
+string base64Value = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(sharingUrl));
+string encodedUrl = "u!" + base64Value.TrimEnd('=').Replace('/','_').Replace('+','-');
+```
+
+**Response**
+
+```
+HTTP/1.1 200 OK
+Content-type: application/json
+
+{
+  "id": "B64397C8-07AE-43E4-920E-32BFB4331A5B",
+  "name": "contoso project.docx",
+  "owner": {
+    "user": {
+      "id": "98E88F1C-F8DC-47CC-A406-C090248B30E5",
+      "displayName": "Ryan Gregg"
+    }
+  }
+}
+```
+
+##### Access the shared item directly
+
+While the SharedDriveItem contains some useful information, most apps will want to directly access the shared DriveItem. The SharedDriveItem resource includes a root and items relationships which can access content within the scope of the shared item.
+
+**Request**
+`GET /shares/{shareIdOrUrl}/driveItem`
+
+**Response**
+```
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "id": "9FFFDB3C-5B87-4062-9606-1B008CA88E44",
+  "name": "contoso project.docx",
+  "eTag": "2246BD2D-7811-4660-BD0F-1CF36133677B,1",
+  "file": {},
+  "size": 109112
+}
+```
+
+##### Example (shared folder)
+
+**Request**
+`GET /shares/{shareIdOrUrl}/driveItem?$expand=children`
+
+**Response**
+```
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "id": "9FFFDB3C-5B87-4062-9606-1B008CA88E44",
+  "name": "Contoso Project",
+  "eTag": "2246BD2D-7811-4660-BD0F-1CF36133677B,1",
+  "folder": {},
+  "size": 10911212,
+  "children": [
+    {
+      "id": "AFBBDD79-868E-452D-AD4D-24697D4A4044",
+      "name": "Propsoal.docx",
+      "file": {},
+      "size": 19001
+    },
+    {
+      "id": "A91FE90A-2F2C-4EE6-B412-C4FFBA3F71A6",
+      "name": "Update to Proposal.docx",
+      "file": {},
+      "size": 91001
+    }
+  ]
+}
+```
+
+#### Get sharing permission for a file or folder  <a name="fileShare"></a>
+
+##### Request
+
+```
+GET /drives/{drive-id}/items/{item-id}/permissions/{perm-id}
+GET /groups/{group-id}/drive/items/{item-id}/permissions/{perm-id}
+GET /me/drive/items/{item-id}/permissions/{perm-id}
+GET /sites/{site-id}/drive/items/{item-id}/permissions/{perm-id}
+GET /users/{user-id}/drive/items/{item-id}/permissions/{perm-id}
+```
+
+##### Response
+```
+HTTP/1.1 200 OK
+Content-type: application/json
+
+{
+  "grantedTo": {
+    "user": {
+      "displayName": "Ryan Gregg",
+      "id": "efee1b77-fb3b-4f65-99d6-274c11914d12"
+    }
+  },
+  "id": "1",
+  "roles": [ "write" ]
+}
+```
+
+- The Permission resource uses facets to provide information about the kind of permission represented by the resource.
+- Permissions with a link facet represent sharing links created on the item. Sharing links contain a unique token that provides access to the item for anyone with the link.
+- Permissions with a invitation facet represent permissions added by inviting specific users or groups to have access to the file.
 
 #### Creating expirable links for Document Sharing <a name="expire"></a>
 
