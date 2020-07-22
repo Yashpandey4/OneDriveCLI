@@ -337,7 +337,7 @@ Content-type: application/json
     {
       "grantedTo": {
         "user": {
-          "displayName": "Ryan Gregg",
+          "displayName": "Kartik Soneji",
           "id": "42F177F1-22C0-4BE3-900D-4507125C5C20"
         }
       },
@@ -452,7 +452,7 @@ Content-type: application/json
 {
   "grantedTo": {
     "user": {
-      "displayName": "Ryan Gregg",
+      "displayName": "Kartik Soneji",
       "id": "efee1b77-fb3b-4f65-99d6-274c11914d12"
     }
   },
@@ -493,7 +493,7 @@ Content-type: application/json
   "owner": {
     "user": {
       "id": "98E88F1C-F8DC-47CC-A406-C090248B30E5",
-      "displayName": "Ryan Gregg"
+      "displayName": "Kartik Soneji"
     }
   }
 }
@@ -573,7 +573,7 @@ Content-type: application/json
 {
   "grantedTo": {
     "user": {
-      "displayName": "Ryan Gregg",
+      "displayName": "Kartik Soneji",
       "id": "efee1b77-fb3b-4f65-99d6-274c11914d12"
     }
   },
@@ -608,6 +608,8 @@ DELETE /users/{user-id}/drive/items/{item-id}/permissions/{perm-id}
 
 **Optional Headers**
 - if-match: string - If this request header is included and the eTag (or cTag) provided does not match the current tag on the item, a 412 Precondition Failed response is returned and the item will not be deleted.
+
+**Note** - Drives with a driveType of personal (OneDrive Personal) cannot create or modify permissions on the root DriveItem.
 
 **Extra: Manual ways to expire a link** 
 - Please see [this](https://support.microsoft.com/en-us/office/stop-sharing-onedrive-or-sharepoint-files-or-folders-or-change-permissions-0a36470f-d7fe-40a0-bd74-0ac6c1e13323) link.
