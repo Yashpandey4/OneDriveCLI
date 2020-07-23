@@ -609,7 +609,9 @@ DELETE /users/{user-id}/drive/items/{item-id}/permissions/{perm-id}
 **Optional Headers**
 - if-match: string - If this request header is included and the eTag (or cTag) provided does not match the current tag on the item, a 412 Precondition Failed response is returned and the item will not be deleted.
 
-**Note** - Drives with a driveType of personal (OneDrive Personal) cannot create or modify permissions on the root DriveItem.
+**Note** 
+- Drives with a driveType of personal (OneDrive Personal) cannot create or modify permissions on the root DriveItem.
+- This is the same as revoking file permission from the UI: The web-url associated with the perm-id deleted ceases to work.
 
 **Extra: Manual ways to expire a link** 
 - Please see [this](https://support.microsoft.com/en-us/office/stop-sharing-onedrive-or-sharepoint-files-or-folders-or-change-permissions-0a36470f-d7fe-40a0-bd74-0ac6c1e13323) link.
@@ -760,3 +762,4 @@ TO - DO
 
 - [Graph Explorer](https://developer.microsoft.com/en-us/graph/graph-explorer)
 - [OneDrive Rest API](https://docs.microsoft.com/en-us/onedrive/developer/rest-api/?view=odsp-graph-online)
+- [OneDrive Integration Concepts](https://docs.microsoft.com/en-us/onedrive/developer/rest-api/concepts/?view=odsp-graph-online): To understand the difference between different endpoints documented in this markdown guide.
