@@ -20,6 +20,7 @@
     - [Accessing shared DriveItems](#access)
     - [Get sharing permission for a file or folder](#fileShare)
   - [Creating expirable links for Document Sharing](#expire)
+    - [Delete Sharing permissions](#deletePerm)
   - [User Authentication](#auth)
     - [code flow](#code_flow)
     - [token flow](#token_flow)
@@ -588,12 +589,12 @@ Content-type: application/json
 
 #### Creating expirable links for Document Sharing <a name="expire"></a>
 
-We can configure this option in Office 365 admin center like below: (No 'obvious' way to do it programatically)
+We can configure this option in Office 365 admin center like below: 
 ![alt text](https://github.com/Yashpandey4/OneDriveCLI/blob/master/Helpers/expire.png "Setting Expiration Date for Shared Docs")
 
 Note: this only applies to external (anonymous) links. Internal (organisational) links dont expire.
 
-##### Deleting permissions using REST API calls
+##### Deleting permissions using REST API calls <a name="deletePerm"></a>
 **Request**
 ```
 DELETE /drives/{drive-id}/items/{item-id}/permissions/{perm-id}
